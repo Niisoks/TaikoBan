@@ -47,7 +47,7 @@ class MainActivity : ComponentActivity() {
 @Preview
 @Composable
 fun OpenCVDialog(){
-    val initialized = initializeOpenCV()
+    val initialized = remember { initializeOpenCV() }
     val openAlertDialog = remember { mutableStateOf(true) }
     Log.d("OpenCVDialog", "$initialized")
     when{
