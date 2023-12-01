@@ -52,7 +52,6 @@ fun OpenCVDialog(){
     Log.d("OpenCVDialog", "$initialized")
     when{
         openAlertDialog.value -> {
-            Log.d("OpenCVDialog", "entered value field!")
             NoticeDialog(
                 onConfirmation = { openAlertDialog.value = false },
                 dialogTitle = "OpenCV Status",

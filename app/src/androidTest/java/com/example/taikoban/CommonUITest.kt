@@ -4,6 +4,8 @@ import android.app.AlertDialog
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -55,6 +57,16 @@ class CommonUITest {
         rule.onNodeWithContentDescription("Alert Dialog").assertExists()
 
         assert(dismissCalled)
+    }
+    @Test
+    fun testOpenCVDialog(){
+        rule.setContent {
+            OpenCVDialog()
+        }
+        Thread.sleep(500)
+        rule.onNodeWithText("initialize", ignoreCase = true)
+        rule.onNodeWithText("").assertDoesNotExist()
+
     }
 
 }
