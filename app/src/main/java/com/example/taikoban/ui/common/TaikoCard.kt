@@ -202,13 +202,13 @@ fun StarBar(
     Row(modifier = modifier, verticalAlignment = Alignment.Bottom){
         Spacer(modifier = Modifier.padding(start = 4.dp))
         Text(
-            fontSize = if(stars >= 10) 10.sp else 14.sp,
+            fontSize = 14.sp,
             modifier = Modifier
                 .padding(top = 1.dp, start = 1.dp)
                 .drawBehind {
                     drawCircle(
                         color = Color.Black,
-                        radius = this.size.minDimension
+                        radius = this.size.minDimension - if(stars>9) 20 else 0
                     )
                 },
             text = stars.toString(),
