@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">TaikoBan</string>
+    <string name="easy">Easy</string>
+    <string name="medium">Medium</string>
+    <string name="hard">Hard</string>
+    <string name="extreme">Extreme</string>
+    <string name="extraExtreme">Extreme+</string>
 </resources>

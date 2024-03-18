@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">太鼓盤</string>
+    <string name="easy">かんたん</string>
+    <string name="medium">ふつう</string>
+    <string name="hard">むずかしい</string>
+    <string name="extreme">おに</string>
+    <string name="extraExtreme">裏おに</string>
+</resources>
