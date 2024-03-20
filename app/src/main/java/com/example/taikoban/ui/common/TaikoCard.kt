@@ -6,6 +6,11 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clipScrollableContainer
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.scrollable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 
@@ -13,6 +18,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,18 +27,31 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -40,12 +59,22 @@ import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.scale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.taikoban.R
@@ -57,32 +86,106 @@ import com.example.taikoban.objects.DifficultyLevel.Companion.icon
 import com.example.taikoban.objects.DifficultyLevel.Companion.name
 
 import com.example.taikoban.objects.Genre
+import com.example.taikoban.objects.Genre.Companion.getColor
 import com.example.taikoban.objects.PassStatus
 import com.example.taikoban.objects.PassStatus.Companion.icon
 import com.example.taikoban.objects.Score
 import com.example.taikoban.objects.ScoreBoardEntry
 import com.example.taikoban.objects.ScoreBoardSong
 import com.example.taikoban.objects.Song
+import com.example.taikoban.objects.SongDifficultyStatus
 import com.example.taikoban.objects.User
+import com.example.taikoban.objects.generateRandomForTest
+import org.w3c.dom.Text
 
 @Preview
 @Composable
 fun ScoreBoardSongPreview() {
-    val song = Song("Furi-furi♪Nori-nori♪", "フリフリ♪ノリノリ♪", Difficulty(1, 2, 3, 4, 5), "", "Session de Dodon ga Don", Genre.NAMCO_ORIGINAL)
-    val user = User("uid1", "User1", null)
-    val score = Score(
-        good = 80,
-        ok = 10,
-        bad = 5,
-        combo = 500,
-        drumRoll = 800,
-        tamaashiGauge = 0.75f,
-        passStatus = PassStatus.FULL_COMBO,
-        difficultyLevel = DifficultyLevel.HARD
-    )
-    val scoreBoardEntry = ScoreBoardEntry(score, user)
-    val scoreBoardSong = ScoreBoardSong(song, mutableListOf(scoreBoardEntry))
-    TaikoCard(scoreBoardSong = scoreBoardSong)
+    val list = generateRandomForTest()
+    val scrollState = rememberScrollState()
+    Column(
+        Modifier.fillMaxSize().scrollable(scrollState, Orientation.Vertical),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        for (card in list){
+            TaikoCard(scoreBoardSong = card)
+        }
+    }
+}
+
+@Composable
+fun TaikoText(
+    text: String,
+    modifier: Modifier = Modifier,
+    color: Color = Color.Unspecified,
+    fontSize: TextUnit = TextUnit.Unspecified,
+    fontStyle: FontStyle? = null,
+    fontWeight: FontWeight? = null,
+    letterSpacing: TextUnit = TextUnit.Unspecified,
+    textDecoration: TextDecoration? = null,
+    textAlign: TextAlign? = null,
+    lineHeight: TextUnit = TextUnit.Unspecified,
+    overflow: TextOverflow = TextOverflow.Clip,
+    softWrap: Boolean = true,
+    maxLines: Int = Int.MAX_VALUE,
+    onTextLayout: (TextLayoutResult) -> Unit = {},
+    style: TextStyle = LocalTextStyle.current,
+    outlineSize: Float = 0f,
+    outlineColor: Color = Color.Black
+){
+    Box {
+        if (outlineSize > 0) {
+            Text(
+                text,
+                modifier,
+                outlineColor,
+                fontSize,
+                fontStyle,
+                fontWeight,
+                FontFamily(Font(R.font.taikonotatujinofficial)),
+                letterSpacing,
+                textDecoration,
+                textAlign,
+                lineHeight,
+                overflow,
+                softWrap,
+                maxLines,
+                onTextLayout,
+                style = TextStyle.Default.copy(
+                    fontSize = fontSize,
+                    drawStyle = Stroke(
+                        miter = 10f,
+                        width = outlineSize,
+                        join = StrokeJoin.Round
+                    )
+                )
+            )
+        }
+        Text(
+            text,
+            modifier,
+            if(color == Color.Unspecified) {
+                if(outlineSize == 0f)
+                    Color.Black
+                else
+                    Color.White
+            } else color,
+            fontSize,
+            fontStyle,
+            fontWeight,
+            FontFamily(Font(R.font.taikonotatujinofficial)),
+            letterSpacing,
+            textDecoration,
+            textAlign,
+            lineHeight,
+            overflow,
+            softWrap,
+            maxLines,
+            onTextLayout,
+            style
+        )
+    }
 }
 
 @Composable
@@ -97,42 +200,112 @@ fun TaikoCard(
     modifier: Modifier = Modifier,
     scoreBoardSong: ScoreBoardSong
     ){
-    val border = 3.dp
-    Card(modifier = modifier,
-        border = BorderStroke(border, Color(0xff131114)),
-        onClick = { /*TODO*/ }
+    Card(border = BorderStroke(3.dp, Color.Black.copy(alpha = 0.2f)),
+        onClick = { /*TODO*/ },
+        colors = CardDefaults.cardColors(containerColor = scoreBoardSong.song.genre.getColor())
     ) {
-        Column(
-            modifier = Modifier.padding(border),
-            horizontalAlignment = Alignment.CenterHorizontally
+        Card(
+            modifier = modifier.padding(vertical = 4.dp, horizontal = 18.dp),
+            onClick = { /*TODO*/ },
+            colors = CardDefaults.cardColors()
         ) {
-            Text("")
-            Text(scoreBoardSong.song.enName)
-            Text("")
-            Row{
-
+            Column(
+                modifier = Modifier
+                    .background(Color.White)
+                    .padding(top = 8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                TaikoText(
+                    text = scoreBoardSong.song.artist,
+                    fontSize = 8.sp,
+                )
+                Spacer(modifier = Modifier.padding(2.dp))
+                TaikoText(
+                    scoreBoardSong.song.enName,
+                    fontWeight = FontWeight.Black,
+                    fontSize = 18.sp,
+                    outlineSize = 15f
+                )
+                Spacer(modifier = Modifier.padding(2.dp))
+                TaikoText(
+                    scoreBoardSong.song.fromSeries,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 12.sp,
+                )
+                DifficultyCardRow(Modifier.padding(8.dp))
             }
         }
     }
 }
 
+@Composable
+fun Int.pxToDp() = with(LocalDensity.current) {
+    this@pxToDp.toDp()
+}
+
+// See if you can find a way to make this only display as many will fit on screen
+// Google does this on the play store... surely it cant be that hard... right?
 @Preview(widthDp = 1000)
 @Composable
 fun DifficultyCardRow(
     modifier: Modifier = Modifier,
-    difficulty: Difficulty = Difficulty(2, 4,  8, 9, 10)
+    difficulty: Difficulty = Difficulty(2, 4,  8, 9, 10),
+    songDifficultyStatus: SongDifficultyStatus = SongDifficultyStatus(PassStatus.DONDER_FULL_COMBO, PassStatus.FULL_COMBO, PassStatus.PASS, PassStatus.DONDER_FULL_COMBO, PassStatus.FULL_COMBO),
+    displayAll: Boolean = false
 ){
-    Row(modifier = modifier){
-        DifficultyButton(difficulty = difficulty.easy, difficultyLevel = DifficultyLevel.EASY, passStatus = PassStatus.FULL_COMBO)
-        DifficultyButton(difficulty = difficulty.medium, difficultyLevel = DifficultyLevel.MEDIUM, passStatus = PassStatus.DONDER_FULL_COMBO)
-        DifficultyButton(difficulty = difficulty.hard, difficultyLevel = DifficultyLevel.HARD, passStatus = PassStatus.FULL_COMBO)
-        DifficultyButton(difficulty = difficulty.extreme, difficultyLevel = DifficultyLevel.EXTREME, passStatus = PassStatus.FULL_COMBO)
-        difficulty.extraExtreme?.let { DifficultyButton(difficulty = it, difficultyLevel = DifficultyLevel.EXTRA_EXTREME, passStatus = PassStatus.FULL_COMBO) }
+    val scrollState = rememberScrollState()
+    LaunchedEffect(Unit) { scrollState.scrollTo(Int.MAX_VALUE) } // Surely a better way to start scroll at end... right?
+    Row(modifier = modifier.horizontalScroll(scrollState),
+        horizontalArrangement = Arrangement.SpaceBetween){
+        if(displayAll) {
+            difficulty.easy?.let {
+                DifficultyButton(
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                    difficulty = it,
+                    difficultyLevel = DifficultyLevel.EASY,
+                    passStatus = songDifficultyStatus.easy
+                )
+            }
+            difficulty.medium?.let {
+                DifficultyButton(
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                    difficulty = it,
+                    difficultyLevel = DifficultyLevel.MEDIUM,
+                    passStatus = songDifficultyStatus.medium
+                )
+            }
+        }
+        if(displayAll || difficulty.extraExtreme == null) {
+            difficulty.hard?.let {
+                DifficultyButton(
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                    difficulty = it,
+                    difficultyLevel = DifficultyLevel.HARD,
+                    passStatus = songDifficultyStatus.hard
+                )
+            }
+        }
+        difficulty.extreme?.let {
+            DifficultyButton(
+                modifier = Modifier.padding(horizontal = 8.dp),
+                difficulty = it,
+                difficultyLevel = DifficultyLevel.EXTREME,
+                passStatus = songDifficultyStatus.extreme
+            )
+        }
+        difficulty.extraExtreme?.let {
+            DifficultyButton(
+                modifier = Modifier.padding(horizontal = 8.dp),
+                difficulty = it,
+                difficultyLevel = DifficultyLevel.EXTRA_EXTREME,
+                passStatus = songDifficultyStatus.extraExtreme
+            )
+        }
+
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun DifficultyButton(
     modifier: Modifier = Modifier,
@@ -140,13 +313,15 @@ fun DifficultyButton(
     difficultyLevel: DifficultyLevel = DifficultyLevel.EASY,
     passStatus: PassStatus = PassStatus.FAIL
 ){
-    Card(onClick = {}) {
+    Card(onClick = {}, modifier) {
         Column(
-            modifier = modifier
+            modifier = Modifier
                 .background(
                     brush = Brush.verticalGradient(
                         colors = listOf(
-                            difficultyLevel.color().copy(alpha = 0.3f),
+                            difficultyLevel
+                                .color()
+                                .copy(alpha = 0.3f),
                             difficultyLevel.color()
                         )
                     )
@@ -154,7 +329,7 @@ fun DifficultyButton(
                 .width(intrinsicSize = IntrinsicSize.Min)
                 .padding(4.dp),
             verticalArrangement = Arrangement.spacedBy(
-                (-11).dp
+                (-5).dp
             )
         ) {
             Row(
@@ -177,14 +352,15 @@ fun DifficultyButton(
                         modifier = Modifier.padding(top = 8.dp)
                     )
                 }
-                Text(
+                TaikoText(
                     modifier = Modifier.padding(bottom = 4.dp),
-                    fontSize = 12.sp,
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold,
                     text = stringResource(difficultyLevel.name()),
-                    color = Color.White,
-                    style = TextStyle.Default.copy(
-                        shadow = Shadow(offset = Offset(1f, 1f))
-                    )
+                    color = Color.Black,
+                    textAlign = TextAlign.End,
+                    outlineSize = 5f,
+                    outlineColor = Color.White
                 )
             }
             StarBar(
@@ -201,14 +377,14 @@ fun StarBar(
 ){
     Row(modifier = modifier, verticalAlignment = Alignment.Bottom){
         Spacer(modifier = Modifier.padding(start = 4.dp))
-        Text(
+        TaikoText(
             fontSize = 14.sp,
             modifier = Modifier
                 .padding(top = 1.dp, start = 1.dp)
                 .drawBehind {
                     drawCircle(
                         color = Color.Black,
-                        radius = this.size.minDimension - if(stars>9) 20 else 0
+                        radius = this.size.minDimension - if (stars > 9) 15 else 0
                     )
                 },
             text = stars.toString(),

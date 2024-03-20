@@ -6,13 +6,18 @@ import com.example.taikoban.objects.DifficultyLevel.Companion.icon
 import kotlin.random.Random
 
 
-private fun generateRandomForTest() {
+fun generateRandomForTest(): MutableList<ScoreBoardSong> {
     val songs = listOf(
-        Song("Song1", "歌曲1", Difficulty(1, 2, 3, 4, 5), "412"  , ""     , Genre.values().random()),
-        Song("Song2", "歌曲2", Difficulty(2, 3, 4, 5, 6), "dj45" , "Noobu", Genre.values().random()),
-        Song("Song3", "歌曲3", Difficulty(3, 4, 5, 6, 7), "d25"  , ""     , Genre.values().random()),
-        Song("Song4", "歌曲4", Difficulty(4, 5, 6, 7, 8), "j24"  , "Jombu", Genre.values().random()),
-        Song("Song5", "歌曲5", Difficulty(5, 6, 7, 8, 9), "dj215", ""     , Genre.values().random())
+        Song("Rolling Star", "ローリンスター", Difficulty(2, 3, 4, 4, 5), "YUI", "", Genre.POP),
+        Song("Gurenge", "紅蓮華", Difficulty(1, 3, 4, 5, 5), "LiSA", "", Genre.ANIME),
+        Song("Senbonzakura", "千本桜", Difficulty(2, 3, 4, 4, 5), "Kurousa-P ft. Hatsune Miku", "", Genre.VOCALOID_MUSIC),
+        Song("Koi Dance", "恋ダンス", Difficulty(1, 2, 3, 4, 5), "Dream5", "", Genre.VARIETY),
+        Song("Canon in D", "カノン", Difficulty(1, 2, 3, 4, 4), "Johann Pachelbel", "", Genre.CLASSICAL),
+        Song("Snake Eater", "スネークイーター", Difficulty(3, 4, 4, 5, 5), "Cynthia Harrell", "Metal Gear Solid", Genre.GAME_MUSIC),
+        Song("Tales of the Abyss Medley", "テイルズオブジアビスメドレー", Difficulty(3, 4, 4, 5, 5), "Motoi Sakuraba", "Tales of the Abyss", Genre.GAME_MUSIC),
+        Song("Wai Wai World", "ワイワイワールド", Difficulty(2, 3, 4, 5, 5), "Unknown", "Wai Wai World", Genre.NAMCO_ORIGINAL),
+        Song("Butterfly", "バタフライ", Difficulty(1, 2, 3, 4, 5), "Koji Wada", "Digimon Adventure", Genre.ANIME),
+        Song("Tetris Theme", "テトリス", Difficulty(1, 2, 3, 4, 5), "Unknown", "Tetris", Genre.GAME_MUSIC)
     )
 
     val users = mutableListOf<User>()
@@ -54,6 +59,7 @@ private fun generateRandomForTest() {
             println("   User: ${entry.user.name}, Score: ${entry.score}")
         }
     }
+    return scoreBoardSongs
 }
 
 data class ScoreBoardSong(
@@ -115,6 +121,14 @@ data class Score(
     val passStatus: PassStatus,
     val difficultyLevel: DifficultyLevel
 )
+
+data class SongDifficultyStatus(
+    val easy: PassStatus = PassStatus.FAIL,
+    val medium: PassStatus = PassStatus.FAIL,
+    val hard: PassStatus = PassStatus.FAIL,
+    val extreme: PassStatus = PassStatus.FAIL,
+    val extraExtreme: PassStatus = PassStatus.FAIL
+){}
 
 enum class PassStatus{
     DONDER_FULL_COMBO,
