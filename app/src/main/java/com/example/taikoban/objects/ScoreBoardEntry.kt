@@ -23,6 +23,7 @@ data class ScoreBoardEntry(
 )
 
 data class Song(
+    val uid: String,
     val enName: String,
     val jpName: String, // Not using a string resource, because it is probably going to come from a server instead of being saved in app?
     val difficultyRating: Difficulty,

@@ -1,6 +1,7 @@
 package com.example.taikoban.ui.common
 
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -144,7 +145,10 @@ fun ScoreBoardSongPreview(viewModel: LocalScoreBoardViewModel = LocalScoreBoardV
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        items(list){it ->
+        items(
+            items = list,
+            key = {it.song.uid}
+        ){it ->
             TaikoCard(scoreBoardSong = it)
         }
     }
