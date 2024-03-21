@@ -6,62 +6,6 @@ import com.example.taikoban.objects.DifficultyLevel.Companion.icon
 import kotlin.random.Random
 
 
-fun generateRandomForTest(): MutableList<ScoreBoardSong> {
-    val songs = listOf(
-        Song("Rolling Star", "ローリンスター", Difficulty(2, 3, 4, 4, 5), "YUI", "", Genre.POP),
-        Song("Gurenge", "紅蓮華", Difficulty(1, 3, 4, 5, 5), "LiSA", "", Genre.ANIME),
-        Song("Senbonzakura", "千本桜", Difficulty(2, 3, 4, 4, 5), "Kurousa-P ft. Hatsune Miku", "", Genre.VOCALOID_MUSIC),
-        Song("Koi Dance", "恋ダンス", Difficulty(1, 2, 3, 4, 5), "Dream5", "", Genre.VARIETY),
-        Song("Canon in D", "カノン", Difficulty(1, 2, 3, 4, 4), "Johann Pachelbel", "", Genre.CLASSICAL),
-        Song("Snake Eater", "スネークイーター", Difficulty(3, 4, 4, 5, 5), "Cynthia Harrell", "Metal Gear Solid", Genre.GAME_MUSIC),
-        Song("Tales of the Abyss Medley", "テイルズオブジアビスメドレー", Difficulty(3, 4, 4, 5, 5), "Motoi Sakuraba", "Tales of the Abyss", Genre.GAME_MUSIC),
-        Song("Wai Wai World", "ワイワイワールド", Difficulty(2, 3, 4, 5, 5), "Unknown", "Wai Wai World", Genre.NAMCO_ORIGINAL),
-        Song("Butterfly", "バタフライ", Difficulty(1, 2, 3, 4, 5), "Koji Wada", "Digimon Adventure", Genre.ANIME),
-        Song("Tetris Theme", "テトリス", Difficulty(1, 2, 3, 4, 5), "Unknown", "Tetris", Genre.GAME_MUSIC)
-    )
-
-    val users = mutableListOf<User>()
-
-    // Generate up to 5 users
-    repeat(Random.nextInt(1, 6)) {
-        users.add(User("uid$it", "User${Random.nextInt(100)}", null)) // Assigning a random name
-    }
-
-    val scoreBoardSongs = mutableListOf<ScoreBoardSong>()
-
-    // Generate up to 10 ScoreBoardSongs
-    repeat(Random.nextInt(1, 11)) {
-        val song = songs.random()
-        val scoreBoardEntries = mutableListOf<ScoreBoardEntry>()
-
-        // Randomly assign scores to users
-        users.forEach { user ->
-            val score = Score(
-                Random.nextInt(0, 101),
-                Random.nextInt(0, 101),
-                Random.nextInt(0, 101),
-                Random.nextInt(0, 1001),
-                Random.nextInt(0, 1001),
-                Random.nextFloat(),
-                PassStatus.values().random(),
-                DifficultyLevel.values().random()
-            )
-            scoreBoardEntries.add(ScoreBoardEntry(score, user))
-        }
-
-        scoreBoardSongs.add(ScoreBoardSong(song, scoreBoardEntries))
-    }
-
-    // Printing generated data for verification
-    scoreBoardSongs.forEachIndexed { index, scoreBoardSong ->
-        println("Song ${index + 1}: ${scoreBoardSong.song.enName} (${scoreBoardSong.song.jpName})")
-        scoreBoardSong.scoreBoardEntries.forEach { entry ->
-            println("   User: ${entry.user.name}, Score: ${entry.score}")
-        }
-    }
-    return scoreBoardSongs
-}
-
 data class ScoreBoardSong(
     val song: Song,
     val scoreBoardEntries: MutableList<ScoreBoardEntry>
@@ -108,6 +52,18 @@ enum class Genre {
                 NAMCO_ORIGINAL -> Color(0xffee5e26)
             }
         }
+
+        fun Genre.getName(): Int {
+            return when(this){
+                POP -> R.string.pop
+                ANIME -> R.string.anime
+                VOCALOID_MUSIC -> R.string.vocaloid
+                VARIETY -> R.string.variety
+                CLASSICAL -> R.string.classical
+                GAME_MUSIC -> R.string.gameMusic
+                NAMCO_ORIGINAL -> R.string.namcoOriginal
+            }
+        }
     }
 }
 
@@ -128,7 +84,7 @@ data class SongDifficultyStatus(
     val hard: PassStatus = PassStatus.FAIL,
     val extreme: PassStatus = PassStatus.FAIL,
     val extraExtreme: PassStatus = PassStatus.FAIL
-){}
+)
 
 enum class PassStatus{
     DONDER_FULL_COMBO,

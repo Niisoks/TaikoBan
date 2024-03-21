@@ -5,4 +5,11 @@
     <string name="hard">Hard</string>
     <string name="extreme">Extreme</string>
     <string name="extraExtreme">Extreme+</string>
+    <string name="pop">Pop</string>
+    <string name="anime">Anime</string>
+    <string name="vocaloid">Vocaloid</string>
+    <string name="variety">Variety</string>
+    <string name="classical">Classical</string>
+    <string name="gameMusic">Game Music</string>
+    <string name="namcoOriginal">Namco Original</string>
 </resources>
