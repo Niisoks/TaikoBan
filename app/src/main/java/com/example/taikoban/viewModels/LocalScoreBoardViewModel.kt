@@ -1,6 +1,7 @@
 package com.example.taikoban.viewModels
 
 import android.util.Log
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -20,9 +21,9 @@ import kotlin.random.Random
 
 class LocalScoreBoardViewModel : ViewModel(){
 
-    var scoreBoard: MutableState<List<ScoreBoardSong>> = mutableStateOf(listOf())
-    var filteredScoreBoard: MutableState<List<ScoreBoardSong>> = mutableStateOf(listOf())
-    var currentFilter: MutableState<Genre> = mutableStateOf(Genre.POP)
+    val scoreBoard: MutableState<List<ScoreBoardSong>> = mutableStateOf(listOf())
+    val filteredScoreBoard: MutableState<List<ScoreBoardSong>> = mutableStateOf(listOf())
+    val currentFilter: MutableState<Genre> = mutableStateOf(Genre.POP)
 
     init {
         viewModelScope.launch {
@@ -33,7 +34,7 @@ class LocalScoreBoardViewModel : ViewModel(){
 
     fun filterScoreBoard(genre: Genre){
         viewModelScope.launch {
-            filteredScoreBoard.value = scoreBoard.value.filter { it.song.genre == genre }
+//            filteredScoreBoard.value = scoreBoard.value.filter { it.song.genre == genre }
             currentFilter.value = genre
         }
     }

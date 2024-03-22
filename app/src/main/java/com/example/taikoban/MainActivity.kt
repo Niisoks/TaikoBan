@@ -27,7 +27,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.taikoban.ui.common.NoticeDialog
 import com.example.taikoban.ui.common.ScoreBoardSongPreview
-import com.example.taikoban.ui.common.filterList
+import com.example.taikoban.ui.common.FilterList
 import com.example.taikoban.ui.theme.TaikoBanTheme
 import com.example.taikoban.viewModels.LocalScoreBoardViewModel
 import org.opencv.android.OpenCVLoader
@@ -45,7 +45,7 @@ class MainActivity : ComponentActivity() {
                 ) {
                     OpenCVDialog()
                     Column {
-                        filterList(viewModel)
+                        FilterList(viewModel)
                         ScoreBoardSongPreview(viewModel)
                     }
                 }

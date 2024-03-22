@@ -3,16 +3,19 @@ package com.example.taikoban.ui.common
 
 import android.util.Log
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.scrollable
+import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -39,6 +42,8 @@ import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -84,18 +89,24 @@ import com.example.taikoban.objects.SongDifficultyStatus
 import com.example.taikoban.viewModels.LocalScoreBoardViewModel
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalFoundationApi::class)
 @Preview
 @Composable
-fun filterList(viewModel: LocalScoreBoardViewModel = LocalScoreBoardViewModel()){
+fun FilterList(viewModel: LocalScoreBoardViewModel = LocalScoreBoardViewModel()){
     val expanded = viewModel.currentFilter
     val state = rememberLazyListState()
     val coroutine = rememberCoroutineScope()
+    val snapBehavior = rememberSnapFlingBehavior(lazyListState = state)
     LaunchedEffect(expanded.value) {
         coroutine.launch { state.animateScrollToItem(expanded.value.ordinal) }
     }
     LazyRow(
-        state = state
+        state = state,
+        flingBehavior = snapBehavior
     ) {
+        item(){
+            Spacer(modifier = Modifier.padding(horizontal = 24.dp))
+        }
         items(Genre.values()){genre ->
             filterButton(
                 expanded = expanded.value == genre,
@@ -104,6 +115,9 @@ fun filterList(viewModel: LocalScoreBoardViewModel = LocalScoreBoardViewModel())
                     viewModel.filterScoreBoard(genre)
                 }
             )
+        }
+        item(){
+            Spacer(modifier = Modifier.padding(horizontal = 24.dp))
         }
     }
 }
@@ -114,9 +128,7 @@ fun filterButton(
     onClick: () -> Unit = {}
 ){
     Button(
-        onClick = {
-                  onClick.invoke()
-        },
+        onClick = onClick,
         shape = RoundedCornerShape(5.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = genre.getColor()
@@ -134,16 +146,34 @@ fun filterButton(
         }
     }
 }
+@OptIn(ExperimentalFoundationApi::class)
+@Preview
 @Composable
 fun ScoreBoardSongPreview(viewModel: LocalScoreBoardViewModel = LocalScoreBoardViewModel()) {
     val list = viewModel.filteredScoreBoard.value
-    val scrollState = rememberScrollState()
+    val currentGenre = viewModel.currentFilter.value
+    val state = rememberLazyListState()
+    val snapBehavior = rememberSnapFlingBehavior(lazyListState = state)
+    val firstVisibleGenre by remember {
+        derivedStateOf {
+            list[state.firstVisibleItemIndex].song.genre
+        }
+    }
+    LaunchedEffect(key1 = currentGenre) {
+        if(firstVisibleGenre != currentGenre){
+            state.scrollToItem(list.indexOfFirst { it.song.genre == currentGenre })
+        }
+    }
+    LaunchedEffect(key1 = firstVisibleGenre) {
+        viewModel.currentFilter.value = firstVisibleGenre
+    }
     LazyColumn(
         Modifier
-            .fillMaxSize()
-            .scrollable(scrollState, Orientation.Vertical),
+            .fillMaxSize(),
+        state = state,
         verticalArrangement = Arrangement.spacedBy(8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        flingBehavior = snapBehavior
     ) {
         items(
             items = list,
