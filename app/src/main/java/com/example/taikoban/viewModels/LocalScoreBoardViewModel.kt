@@ -23,7 +23,9 @@ class LocalScoreBoardViewModel : ViewModel(){
 
     val scoreBoard: MutableState<List<ScoreBoardSong>> = mutableStateOf(listOf())
     val filteredScoreBoard: MutableState<List<ScoreBoardSong>> = mutableStateOf(listOf())
-    val currentFilter: MutableState<Genre> = mutableStateOf(Genre.POP)
+
+    val currentGenre: MutableState<Genre> = mutableStateOf(Genre.POP)
+    val selectedGenre: MutableState<Genre?> = mutableStateOf(Genre.POP)
 
     init {
         viewModelScope.launch {
@@ -32,12 +34,12 @@ class LocalScoreBoardViewModel : ViewModel(){
         }
     }
 
-    fun filterScoreBoard(genre: Genre){
-        viewModelScope.launch {
-//            filteredScoreBoard.value = scoreBoard.value.filter { it.song.genre == genre }
-            currentFilter.value = genre
-        }
-    }
+//    fun filterScoreBoard(genre: Genre){
+//        viewModelScope.launch {
+////            filteredScoreBoard.value = scoreBoard.value.filter { it.song.genre == genre }
+//            currentFilter.value = genre
+//        }
+//    }
 
     fun generateTestScoreBoard(): List<ScoreBoardSong> {
         val songs = listOf(

@@ -24,8 +24,10 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -56,6 +58,7 @@ import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
@@ -92,15 +95,19 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalFoundationApi::class)
 @Preview
 @Composable
-fun FilterList(viewModel: LocalScoreBoardViewModel = LocalScoreBoardViewModel()){
-    val expanded = viewModel.currentFilter
-    val state = rememberLazyListState()
+fun FilterList(
+    modifier: Modifier = Modifier,
+    viewModel: LocalScoreBoardViewModel = LocalScoreBoardViewModel(),
+    state: LazyListState = rememberLazyListState()
+){
+    val expanded = viewModel.currentGenre
     val coroutine = rememberCoroutineScope()
     val snapBehavior = rememberSnapFlingBehavior(lazyListState = state)
     LaunchedEffect(expanded.value) {
         coroutine.launch { state.animateScrollToItem(expanded.value.ordinal) }
     }
     LazyRow(
+        modifier = modifier.wrapContentSize(),
         state = state,
         flingBehavior = snapBehavior
     ) {
@@ -112,7 +119,7 @@ fun FilterList(viewModel: LocalScoreBoardViewModel = LocalScoreBoardViewModel())
                 expanded = expanded.value == genre,
                 genre = genre,
                 onClick = {
-                    viewModel.filterScoreBoard(genre)
+                    viewModel.selectedGenre.value = genre
                 }
             )
         }
@@ -151,39 +158,56 @@ fun filterButton(
 @Composable
 fun ScoreBoardSongPreview(viewModel: LocalScoreBoardViewModel = LocalScoreBoardViewModel()) {
     val list = viewModel.filteredScoreBoard.value
-    val currentGenre = viewModel.currentFilter.value
-    val state = rememberLazyListState()
-    val snapBehavior = rememberSnapFlingBehavior(lazyListState = state)
+    val currentGenre = viewModel.currentGenre.value
+    val selectedGenre = viewModel.selectedGenre.value
+    val verticalState = rememberLazyListState()
+    val horizontalState = rememberLazyListState()
+    val snapBehavior = rememberSnapFlingBehavior(lazyListState = verticalState)
+    val coroutine = rememberCoroutineScope()
+
     val firstVisibleGenre by remember {
         derivedStateOf {
-            list[state.firstVisibleItemIndex].song.genre
+            list[verticalState.firstVisibleItemIndex].song.genre
         }
     }
-    LaunchedEffect(key1 = currentGenre) {
-        if(firstVisibleGenre != currentGenre){
-            state.scrollToItem(list.indexOfFirst { it.song.genre == currentGenre })
+    LaunchedEffect(key1 = selectedGenre) {
+        coroutine.launch {
+            verticalState.animateScrollToItem(list.indexOfFirst { it.song.genre == selectedGenre })
         }
     }
     LaunchedEffect(key1 = firstVisibleGenre) {
-        viewModel.currentFilter.value = firstVisibleGenre
-    }
-    LazyColumn(
-        Modifier
-            .fillMaxSize(),
-        state = state,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        flingBehavior = snapBehavior
-    ) {
-        items(
-            items = list,
-            key = {it.song.uid}
-        ){it ->
-            TaikoCard(scoreBoardSong = it)
+        coroutine.launch {
+            viewModel.currentGenre.value = firstVisibleGenre
         }
+    }
+    Box() {
+        LazyColumn(
+            Modifier
+                .fillMaxSize(),
+            state = verticalState,
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            flingBehavior = snapBehavior
+        ) {
+            item{
+                Spacer(modifier = Modifier.padding(26.dp))
+            }
+            items(
+                items = list,
+                key = { it.song.uid }
+            ) { it ->
+                TaikoCard(scoreBoardSong = it)
+            }
+        }
+        FilterList(
+            modifier = Modifier.align(Alignment.TopCenter),
+            viewModel = viewModel,
+            state = horizontalState
+        )
     }
 }
 
+@OptIn(ExperimentalTextApi::class)
 @Composable
 fun TaikoText(
     text: String,
