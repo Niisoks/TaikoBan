@@ -31,7 +31,6 @@ import com.example.taikoban.objects.DifficultyLevel.Companion.icon
 import com.example.taikoban.objects.DifficultyLevel.Companion.name
 import com.example.taikoban.objects.PassStatus
 import com.example.taikoban.objects.PassStatus.Companion.icon
-import com.example.taikoban.ui.common.StarBar
 import com.example.taikoban.ui.common.TaikoText
 
 @OptIn(ExperimentalMaterial3Api::class)
