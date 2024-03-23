@@ -95,6 +95,7 @@ class LocalScoreBoardViewModel : ViewModel(){
                     Random.nextInt(0, 101),
                     Random.nextInt(0, 101),
                     Random.nextInt(0, 101),
+                    Random.nextInt(0, 9999999),
                     Random.nextInt(0, 1001),
                     Random.nextInt(0, 1001),
                     Random.nextFloat(),

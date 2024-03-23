@@ -12,4 +12,9 @@
     <string name="classical">Classical</string>
     <string name="gameMusic">Game Music</string>
     <string name="namcoOriginal">Namco Original</string>
+    <string name="combo">Combo</string>
+    <string name="good">Good</string>
+    <string name="ok">Ok</string>
+    <string name="bad">Bad</string>
+    <string name="drumRoll">Drum Roll</string>
 </resources>

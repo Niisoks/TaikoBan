@@ -2,8 +2,6 @@ package com.example.taikoban.objects
 
 import androidx.compose.ui.graphics.Color
 import com.example.taikoban.R
-import com.example.taikoban.objects.DifficultyLevel.Companion.icon
-import kotlin.random.Random
 
 
 data class ScoreBoardSong(
@@ -19,7 +17,8 @@ data class User(
 
 data class ScoreBoardEntry(
     val score: Score,
-    val user: User
+    val user: User,
+    val type: PeripheralType = PeripheralType.UNKNOWN
 )
 
 data class Song(
@@ -31,6 +30,24 @@ data class Song(
     val fromSeries: String,
     val genre: Genre
 )
+
+enum class PeripheralType {
+    DRUM,
+    TOUCH_SCREEN,
+    CONTROLLER_KEYBOARD,
+    UNKNOWN;
+
+    companion object{
+        fun PeripheralType.getIcon(): Int{
+            return when(this){
+                DRUM -> R.drawable.donchan
+                TOUCH_SCREEN -> R.drawable.donchan
+                CONTROLLER_KEYBOARD -> R.drawable.donchan
+                UNKNOWN -> R.drawable.donchan
+            }
+        }
+    }
+}
 
 enum class Genre {
     POP,
@@ -72,6 +89,7 @@ data class Score(
     val good: Int,
     val ok: Int,
     val bad: Int,
+    val points: Int,
     val combo: Int,
     val drumRoll: Int,
     val tamaashiGauge: Float, // 1 being 100%, 0 being 0%

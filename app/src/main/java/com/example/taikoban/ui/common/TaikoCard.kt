@@ -4,51 +4,72 @@ package com.example.taikoban.ui.common
 import androidx.compose.animation.core.animateIntOffsetAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.taikoban.R
 import com.example.taikoban.objects.DifficultyLevel
+import com.example.taikoban.objects.DifficultyLevel.Companion.icon
 import com.example.taikoban.objects.Genre.Companion.getColor
 import com.example.taikoban.objects.PassStatus
+import com.example.taikoban.objects.PassStatus.Companion.icon
+import com.example.taikoban.objects.PeripheralType
+import com.example.taikoban.objects.PeripheralType.Companion.getIcon
+import com.example.taikoban.objects.Score
 import com.example.taikoban.objects.ScoreBoardEntry
 import com.example.taikoban.objects.ScoreBoardSong
 import com.example.taikoban.objects.SongDifficultyStatus
+import com.example.taikoban.objects.User
 import com.example.taikoban.ui.difficulty.DifficultyCardRow
 import com.example.taikoban.ui.filterRow.FilterList
 import com.example.taikoban.viewModels.LocalScoreBoardViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class)
-@Preview
+//@Preview
 @Composable
 fun ScoreBoardSongPreview(viewModel: LocalScoreBoardViewModel = LocalScoreBoardViewModel()) {
     val list = viewModel.filteredScoreBoard.value
@@ -132,9 +153,11 @@ fun TaikoCard(
     modifier: Modifier = Modifier,
     scoreBoardSong: ScoreBoardSong
     ){
+    val visibleScore = remember{mutableStateOf(false)}
+    val scoreBoardEntries = remember{scoreBoardSong.scoreBoardEntries}
     Card(border = BorderStroke(3.dp, Color.Black.copy(alpha = 0.2f)),
         modifier = modifier,
-        onClick = { /*TODO*/ },
+        onClick = { visibleScore.value = !visibleScore.value },
         colors = CardDefaults.cardColors(containerColor = scoreBoardSong.song.genre.getColor())
     ) {
         Card(
@@ -172,10 +195,195 @@ fun TaikoCard(
                 )
             }
         }
+
+        if(visibleScore.value){
+            LazyColumn(
+                modifier = Modifier.height(256.dp)
+            ){
+                items(
+                    scoreBoardEntries
+                ){
+                    UserScore(scoreBoardEntry = it)
+                }
+            }
+        }
     }
 }
 
 
+@Composable
+fun UserButton(
+    modifier: Modifier = Modifier,
+    user: User,
+    onClick: () -> Unit = {}
+){
+
+    Box(modifier = modifier, contentAlignment = Alignment.CenterStart) {
+        Button(
+            modifier = Modifier.padding(start = 24.dp),
+            onClick = onClick,
+            colors = ButtonDefaults.buttonColors(containerColor = Color.White)
+        ) {
+            TaikoText(text = user.name)
+        }
+        ProfileDon(modifier)
+    }
+}
+
+@Composable
+fun ProfileDon(
+    modifier: Modifier = Modifier
+) {
+    Icon(
+        painter = painterResource(R.drawable.donchan),
+        "User image",
+        modifier = modifier.size(48.dp),
+        tint = Color.Unspecified,
+    )
+}
+
+@Composable
+fun UserScore(
+    modifier: Modifier = Modifier,
+    scoreBoardEntry: ScoreBoardEntry,
+    onClick: () -> Unit = {}
+){
+    val user = scoreBoardEntry.user
+    val score = scoreBoardEntry.score
+    Column {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier
+                .clip(RoundedCornerShape(topStart = 15.dp, topEnd = 15.dp))
+                .background(color = Color.Black.copy(alpha = 0.4f))
+                .fillMaxWidth()
+        ) {
+            UserButton(user = user)
+            Column(
+                Modifier
+                    .clip(RoundedCornerShape(15.dp))
+                    .background(color = Color.Black.copy(alpha = 0.4f)),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Row(
+                    modifier = Modifier
+                        .padding(4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Image(
+                        painter = painterResource(id = score.difficultyLevel.icon()),
+                        contentDescription = "",
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Image(
+                        painter = painterResource(id = score.passStatus.icon()),
+                        contentDescription = "",
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Image(
+                        painter = painterResource(id = scoreBoardEntry.type.getIcon()),
+                        contentDescription = "",
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+                TaikoText(
+                    text = "${score.points}",
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(4.dp),
+                    fontSize = 24.sp,
+                    outlineSize = 15f
+                )
+            }
+            Column(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(15.dp))
+                    .background(Color.White.copy(alpha = 0.3f)),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                TaikoText(
+                    text = stringResource(id = R.string.combo),
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(4.dp),
+                    fontSize = 16.sp,
+                    outlineSize = 15f,
+                    maxLines = 1
+                )
+                TaikoText(
+                    text = "${score.combo}",
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(4.dp),
+                    fontSize = 16.sp,
+                    outlineSize = 15f,
+                    maxLines = 1
+                )
+            }
+
+        }
+        Row {
+            flatTopScore(title = stringResource(id = R.string.good), score.good         , modifier.weight(1f))
+            flatTopScore(title = stringResource(id = R.string.ok), score.ok             , modifier.weight(1f))
+            flatTopScore(title = stringResource(id = R.string.bad), score.bad           , modifier.weight(1f))
+            flatTopScore(title = stringResource(id = R.string.drumRoll), score.drumRoll , modifier.weight(1f))
+        }
+    }
+}
+
+@Preview
+@Composable
+fun flatTopScore(
+    title : String = "Good",
+    value : Int = 123421,
+    modifier: Modifier = Modifier
+){
+    Column(
+        modifier = modifier
+            .clip(RoundedCornerShape(bottomStart = 15.dp, bottomEnd = 15.dp))
+            .background(Color.White.copy(alpha = 0.3f)),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        TaikoText(text = title, outlineSize = 5f)
+        TaikoText(text = value.toString(), outlineSize = 5f, modifier = modifier.padding(horizontal = 8.dp))
+    }
+}
+
+@Preview
+@Composable
+fun UserScorePreview(){
+    UserScore(scoreBoardEntry = ScoreBoardEntry(
+        score = Score(
+            good = 500,
+            ok = 50,
+            bad = 10,
+            combo = 1200,
+            drumRoll = 100,
+            tamaashiGauge = 0.8f,
+            passStatus = PassStatus.PASS,
+            difficultyLevel = DifficultyLevel.HARD,
+            points = 661890345
+        ),
+        user = User(
+            uid = "user1",
+            name = "Test User",
+            profileIcon = null
+        ),
+        type = PeripheralType.DRUM
+    ))
+}
+
+@Preview
+@Composable
+private fun UserButtonPreview(){
+    UserButton(user =  User(
+            uid = "user1",
+            name = "Test User",
+            profileIcon = null
+        )
+    )
+}
+
+// Is this what the mythical use-case is for?
 fun getHighestScores(scoreBoardEntries: MutableList<ScoreBoardEntry>): SongDifficultyStatus {
     val highestScores = mutableMapOf<DifficultyLevel, PassStatus>()
 
