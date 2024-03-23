@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -28,6 +29,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
@@ -50,6 +53,7 @@ import kotlinx.coroutines.launch
 fun ScoreBoardSongPreview(viewModel: LocalScoreBoardViewModel = LocalScoreBoardViewModel()) {
     val list = viewModel.filteredScoreBoard.value
     val selectedGenre = viewModel.selectedGenre
+    val localDensity = LocalDensity.current
     val verticalState = rememberLazyListState()
     val horizontalState = rememberLazyListState()
     val snapBehavior = rememberSnapFlingBehavior(lazyListState = verticalState)
@@ -74,6 +78,7 @@ fun ScoreBoardSongPreview(viewModel: LocalScoreBoardViewModel = LocalScoreBoardV
             viewModel.currentGenre.value = firstVisibleGenre
         }
     }
+
     Box() {
         LazyColumn(
             Modifier
@@ -90,7 +95,13 @@ fun ScoreBoardSongPreview(viewModel: LocalScoreBoardViewModel = LocalScoreBoardV
                 items = list,
                 key = { it.song.uid }
             ) { it ->
-                TaikoCard(scoreBoardSong = it)
+                TaikoCard(scoreBoardSong = it,
+                    modifier = viewModel.cardWidth.value?.let{Modifier.width(it)} ?: Modifier.onGloballyPositioned { card ->
+                        with (localDensity) {
+                            viewModel.cardWidth.value = card.size.width.toDp()
+                        }
+                    }
+                )
             }
         }
 
@@ -104,7 +115,9 @@ fun ScoreBoardSongPreview(viewModel: LocalScoreBoardViewModel = LocalScoreBoardV
         )
 
         FilterList(
-            modifier = Modifier.align(Alignment.TopCenter).offset{offset},
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .offset { offset },
             viewModel = viewModel,
             state = horizontalState
         )
@@ -125,7 +138,7 @@ fun TaikoCard(
         colors = CardDefaults.cardColors(containerColor = scoreBoardSong.song.genre.getColor())
     ) {
         Card(
-            modifier = modifier.padding(vertical = 4.dp, horizontal = 18.dp),
+            modifier = Modifier.padding(vertical = 4.dp, horizontal = 18.dp),
             colors = CardDefaults.cardColors()
         ) {
             Column(

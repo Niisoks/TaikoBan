@@ -8,6 +8,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.taikoban.objects.Difficulty
 import com.example.taikoban.objects.DifficultyLevel
@@ -16,6 +17,7 @@ import com.example.taikoban.objects.SongDifficultyStatus
 
 // See if you can find a way to make this only display as many will fit on screen
 // Google does this on the play store... surely it cant be that hard... right?
+@Preview
 @Composable
 fun DifficultyCardRow(
     modifier: Modifier = Modifier,
@@ -73,4 +75,11 @@ fun DifficultyCardRow(
         }
 
     }
+}
+@Preview(device = "spec:parent=pixel_5,orientation=landscape")
+@Composable
+private fun preview(){
+    DifficultyCardRow(
+        displayAll = true
+    )
 }

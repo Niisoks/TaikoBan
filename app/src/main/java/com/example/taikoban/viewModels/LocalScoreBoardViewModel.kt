@@ -1,9 +1,8 @@
 package com.example.taikoban.viewModels
 
-import android.util.Log
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.taikoban.objects.Difficulty
@@ -26,6 +25,8 @@ class LocalScoreBoardViewModel : ViewModel(){
 
     val currentGenre: MutableState<Genre> = mutableStateOf(Genre.POP)
     val selectedGenre: MutableState<Genre?> = mutableStateOf(Genre.POP)
+
+    val cardWidth: MutableState<Dp?> = mutableStateOf(null)
 
     init {
         viewModelScope.launch {
