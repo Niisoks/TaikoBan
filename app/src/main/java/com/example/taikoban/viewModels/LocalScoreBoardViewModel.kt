@@ -26,7 +26,21 @@ class LocalScoreBoardViewModel : ViewModel(){
     val currentGenre: MutableState<Genre> = mutableStateOf(Genre.POP)
     val selectedGenre: MutableState<Genre?> = mutableStateOf(Genre.POP)
 
+    private val selectedSong: MutableState<ScoreBoardSong?> = mutableStateOf(null)
+    val filteredScores: MutableState<List<ScoreBoardEntry?>> = mutableStateOf(listOf())
+    val selectedDifficulty: MutableState<DifficultyLevel?> = mutableStateOf(null)
+
     val cardWidth: MutableState<Dp?> = mutableStateOf(null)
+
+    val testSong = ScoreBoardSong(
+        Song("${UUID.randomUUID()}","Dragon Ball Z Opening", "ドラゴンボールZ オープニング", Difficulty(3, 5, 6, 8, 9), "Hironobu Kageyama", "Dragon Ball Z", Genre.ANIME),
+        mutableListOf(ScoreBoardEntry(
+            Score(1,2,3,4,5,6,7f,PassStatus.PASS, difficultyLevel = DifficultyLevel.EXTRA_EXTREME),
+            User("jeff", "jeff", 3))
+        )
+    )
+
+
 
     init {
         viewModelScope.launch {
@@ -35,12 +49,22 @@ class LocalScoreBoardViewModel : ViewModel(){
         }
     }
 
-//    fun filterScoreBoard(genre: Genre){
-//        viewModelScope.launch {
-////            filteredScoreBoard.value = scoreBoard.value.filter { it.song.genre == genre }
-//            currentFilter.value = genre
-//        }
-//    }
+    fun selectSongAndFilter(song: ScoreBoardSong, difficulty: DifficultyLevel?){
+        viewModelScope.launch {
+            selectedSong.value = song
+            filterBySelectedDifficulty(difficulty)
+        }
+    }
+
+    fun filterBySelectedDifficulty(difficulty: DifficultyLevel?) {
+        selectedDifficulty.value = difficulty
+        if (difficulty == null) {
+            filteredScores.value = selectedSong.value?.scoreBoardEntries?.sortedByDescending { it.score.points } ?: listOf()
+            return
+        }
+        val unsortedScores = selectedSong.value?.scoreBoardEntries
+        filteredScores.value = unsortedScores?.filter { it.score.difficultyLevel == difficulty }?.sortedByDescending { it.score.points } ?: listOf()
+    }
 
     fun generateTestScoreBoard(): List<ScoreBoardSong> {
         val songs = listOf(

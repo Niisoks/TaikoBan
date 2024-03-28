@@ -14,9 +14,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.example.taikoban.screens.SongListScreen
+import com.example.taikoban.ui.NavLocation
 import com.example.taikoban.ui.common.NoticeDialog
-import com.example.taikoban.ui.common.ScoreBoardSongPreview
-
 import com.example.taikoban.viewModels.LocalScoreBoardViewModel
 import org.opencv.android.OpenCVLoader
 
@@ -24,6 +27,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            val navController = rememberNavController()
             val viewModel = remember{LocalScoreBoardViewModel()}
 //            TaikoBanTheme {
                 // A surface container using the 'background' color from the theme
@@ -32,9 +36,10 @@ class MainActivity : ComponentActivity() {
                         .fillMaxSize()
                         .background(MaterialTheme.colorScheme.background)
                 ) {
-                    OpenCVDialog()
-
-                    ScoreBoardSongPreview(viewModel)
+                    NavHost(navController = navController, startDestination = NavLocation.SONG_LIST.route){
+                        composable(NavLocation.SONG_LIST.route){ SongListScreen(navController, viewModel) }
+                        composable(NavLocation.SCOREBOARD.route){ SongListScreen(navController, viewModel) }
+                    }
                 }
 //            }
         }
